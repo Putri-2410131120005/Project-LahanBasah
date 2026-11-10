@@ -1,0 +1,10 @@
+{
+  "description": "Jelajahi Pasar Terapung Lok Baintan melalui kisah budaya Banjar, galeri foto, aktivitas wisata, serta panduan praktis untuk merencanakan kunjungan.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

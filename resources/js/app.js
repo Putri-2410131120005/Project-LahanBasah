@@ -21,6 +21,64 @@ function closeDialog(dialog) {
 }
 
 function initializePage() {
+const navToggle = document.querySelector('[data-nav-toggle]');
+const navMenu = document.querySelector('#main-navigation');
+if (navToggle && navMenu && navToggle.dataset.lbBound !== 'true') {
+    navToggle.dataset.lbBound = 'true';
+    const closeNavigation = () => {
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.setAttribute('aria-label', 'Buka menu navigasi');
+        document.querySelector('.header')?.classList.remove('is-menu-open');
+    };
+    navToggle.addEventListener('click', () => {
+        const open = navToggle.getAttribute('aria-expanded') !== 'true';
+        navToggle.setAttribute('aria-expanded', String(open));
+        navToggle.setAttribute('aria-label', open ? 'Tutup menu navigasi' : 'Buka menu navigasi');
+        document.querySelector('.header')?.classList.toggle('is-menu-open', open);
+    });
+    navMenu.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeNavigation));
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeNavigation();
+    });
+}
+const syncOrganismCardHeights = (grid) => {
+    if (!grid) return;
+    const cards = $$('[data-organism-card]', grid);
+    cards.forEach((card) => { card.style.minHeight = ''; });
+    if (window.matchMedia('(max-width: 640px)').matches) return;
+    const closedCards = cards.filter((card) => !card.classList.contains('is-open'));
+    if (!closedCards.length) return;
+    const tallestClosedCard = Math.max(...closedCards.map((card) => card.getBoundingClientRect().height));
+    closedCards.forEach((card) => { card.style.minHeight = `${Math.ceil(tallestClosedCard)}px`; });
+};
+$$('[data-organism-toggle]').forEach((button) => {
+    if (button.dataset.lbBound === 'true') return;
+    button.dataset.lbBound = 'true';
+    button.addEventListener('click', () => {
+        const card = button.closest('[data-organism-card]');
+        const grid = card?.closest('[data-organism-grid]');
+        const group = card?.dataset.organismGroup;
+        const willOpen = button.getAttribute('aria-expanded') !== 'true';
+        $$('[data-organism-card]', grid).filter((item) => item.dataset.organismGroup === group).forEach((item) => {
+            const control = item.querySelector('[data-organism-toggle]');
+            const panel = item.querySelector('.organism-extra');
+            const active = item === card && willOpen;
+            item.classList.toggle('is-open', active);
+            control?.setAttribute('aria-expanded', String(active));
+            if (control) control.textContent = active ? 'Tampilkan Lebih Sedikit' : 'Lihat Selengkapnya';
+            panel?.setAttribute('aria-hidden', String(!active));
+        });
+        requestAnimationFrame(() => syncOrganismCardHeights(grid));
+        window.setTimeout(() => syncOrganismCardHeights(grid), 340);
+    });
+});
+$$('[data-organism-grid]').forEach((grid) => {
+    if (grid.dataset.lbHeightBound === 'true') return;
+    grid.dataset.lbHeightBound = 'true';
+    const sync = () => syncOrganismCardHeights(grid);
+    window.addEventListener('resize', sync, { passive: true });
+    sync();
+});
 $$('[data-close-dialog]').forEach((button) => {
     if (button.dataset.lbBound === 'true') return;
     button.dataset.lbBound = 'true';

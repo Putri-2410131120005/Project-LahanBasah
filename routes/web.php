@@ -8,6 +8,7 @@ Route::controller(PageController::class)->group(function (): void {
     Route::get('/tentang-lok-baintan', 'about')->name('about');
     Route::get('/jelajah-wisata', 'explore')->name('explore');
     Route::get('/pesona-lahan-basah', 'wetlands')->name('wetlands');
+    Route::get('/pesona-lahan-basah/{slug}', 'wetlandDetail')->name('wetlands.detail');
     Route::get('/galeri', 'gallery')->name('gallery');
     Route::get('/panduan-berkunjung', 'guide')->name('guide');
 });

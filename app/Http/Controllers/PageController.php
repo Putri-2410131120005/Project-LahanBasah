@@ -117,6 +117,27 @@ class PageController extends Controller
         $creditsPath = resource_path('data/media-credits.json');
         $credits = json_decode(file_get_contents($creditsPath), true, flags: JSON_THROW_ON_ERROR);
 
-        return compact('images', 'activities', 'gallery', 'destinations', 'credits');
+        $wetlandOrganisms = [
+            [
+                'name' => 'Nipah',
+                'category' => 'Flora pesisir & tepian perairan',
+                'image' => $images['tropical'],
+                'description' => 'Nipah merupakan tumbuhan beradaptasi pada lingkungan berair atau payau. Pola pertumbuhannya menggambarkan hubungan vegetasi pesisir dengan aliran air, namun kehadirannya di Lok Baintan perlu konfirmasi lapangan.',
+            ],
+            [
+                'name' => 'Ikan air tawar',
+                'category' => 'Fauna sungai',
+                'image' => $images['river'],
+                'description' => 'Ikan dan organisme air menjadi bagian dari jaring kehidupan sungai. Identitas spesies setempat sebaiknya dikonfirmasi melalui observasi atau sumber ilmiah sebelum dicantumkan sebagai fakta lokasi.',
+            ],
+            [
+                'name' => 'Burung air',
+                'category' => 'Fauna lahan basah',
+                'image' => $images['panorama'],
+                'description' => 'Burung yang mencari makan di tepian dapat menunjukkan kesehatan habitat dan ketersediaan makanan. Penampakan spesies berbeda mengikuti musim, cuaca, dan kondisi sungai.',
+            ],
+        ];
+
+        return compact('images', 'activities', 'gallery', 'destinations', 'credits', 'wetlandOrganisms');
     }
 }

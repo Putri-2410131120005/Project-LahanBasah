@@ -17,6 +17,37 @@ class SitePagesTest extends TestCase
             ->assertSee('Rencanakan Kunjungan');
     }
 
+    public function test_wetland_exploration_sections_render_carefully_framed_content(): void
+    {
+        $this->get(route('wetlands'))
+            ->assertOk()
+            ->assertSee('Flora dan fauna ekosistem lahan basah')
+            ->assertSee('Wisata Bertanggung Jawab')
+            ->assertSee('Langkah kecil yang berarti bagi sungai');
+    }
+
+    public function test_premium_planner_and_audio_controls_render(): void
+    {
+        $this->get(route('guide'))
+            ->assertOk()
+            ->assertSee('Simpan Rencana')
+            ->assertSee('Bagikan WhatsApp')
+            ->assertSee('Timeline kunjungan')
+            ->assertSee('Lihat Detail Destinasi')
+            ->assertSee('lb-music-button', false);
+    }
+
+    public function test_culture_and_responsible_visit_sections_render(): void
+    {
+        $this->get(route('about'))
+            ->assertOk()
+            ->assertSee('Tradisi yang bertahan melalui perubahan');
+
+        $this->get(route('guide'))
+            ->assertOk()
+            ->assertSee('Keselamatan dan etika kunjungan');
+    }
+
     public static function pages(): array
     {
         return [

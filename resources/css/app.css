@@ -8388,3 +8388,618 @@ nav {
   pointer-events: auto;
   cursor: pointer;
 }
+
+/* Lok Baintan package catalog */
+.lb-package-catalog {
+  width: min(1200px, calc(100% - 64px));
+  max-width: 1200px;
+  margin: 0 auto 72px;
+  padding: 44px 0 24px;
+  color: #173e34;
+}
+
+.lb-package-catalog .lb-catalog-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.lb-package-catalog .lb-catalog-eyebrow {
+  display: block;
+  color: #987447;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  margin-bottom: 10px;
+}
+
+.lb-package-catalog .lb-catalog-heading h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(27px, 3vw, 36px);
+  line-height: 1.2;
+  font-weight: 500;
+  margin: 0 0 10px;
+}
+
+.lb-package-catalog .lb-catalog-heading p {
+  color: #64716a;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.lb-package-catalog .lb-catalog-count {
+  flex: 0 0 auto;
+  border: 1px solid #d2ddcd;
+  border-radius: 30px;
+  padding: 9px 15px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eaf0e6;
+}
+
+.lb-package-catalog .lb-package-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch;
+  margin: 0;
+}
+
+.lb-package-catalog .lb-package-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 26px;
+  background: #fffefa;
+  border: 1px solid #d6dfd0;
+  border-radius: 16px;
+  box-shadow: 0 8px 26px rgba(23, 62, 52, .045);
+  color: #173e34;
+}
+
+.lb-package-catalog .lb-package-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.lb-package-catalog .lb-package-number {
+  color: #97784d;
+}
+
+.lb-package-catalog .lb-package-category {
+  padding: 7px 10px;
+  border-radius: 20px;
+  background: #eaf0e6;
+  color: #34705b;
+  letter-spacing: 0;
+}
+
+.lb-package-catalog .lb-package-card h3 {
+  min-height: 58px;
+  margin: 0 0 19px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.lb-package-catalog .lb-package-info {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 24px;
+}
+
+.lb-package-catalog .lb-package-info div {
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.lb-package-catalog .lb-package-info dt {
+  color: #738077;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.lb-package-catalog .lb-package-info dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.lb-package-catalog .lb-package-footer {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #e0e6dc;
+}
+
+.lb-package-catalog .lb-package-price {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lb-package-catalog .lb-package-price small {
+  color: #708074;
+  font-size: 11px;
+}
+
+.lb-package-catalog .lb-package-price strong {
+  font-size: clamp(18px, 1.8vw, 23px);
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.lb-package-catalog .lb-package-price span {
+  color: #6b766e;
+  font-size: 11px;
+}
+
+.lb-package-catalog .lb-package-choose {
+  min-height: 44px;
+  flex: 0 0 auto;
+  padding: 10px 15px;
+  border: 1px solid #173e34;
+  border-radius: 9px;
+  background: #173e34;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lb-package-catalog .lb-package-choose:hover {
+  background: #34705b;
+}
+
+.lb-package-catalog .lb-catalog-disclaimer {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: #788178;
+  line-height: 1.7;
+}
+
+#travel-planner .lb-saved-edit:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  margin: 18px 0 6px;
+  border: 1px solid #cad9c6;
+  border-radius: 12px;
+  background: #edf3e9;
+  color: #173e34;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+#travel-planner .lb-saved-edit .button {
+  flex: 0 0 auto;
+  font-size: 13px;
+}
+
+@media (max-width: 1050px) {
+  .lb-package-catalog .lb-package-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .lb-package-catalog {
+    width: calc(100% - 32px);
+    padding-top: 30px;
+    margin-bottom: 42px;
+  }
+
+  .lb-package-catalog .lb-catalog-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .lb-package-catalog .lb-package-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lb-package-catalog .lb-package-card {
+    padding: 22px;
+  }
+
+  .lb-package-catalog .lb-package-card h3 {
+    min-height: 0;
+  }
+
+  #travel-planner .lb-saved-edit:not([hidden]) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Saved itinerary edit control remains accessible beside checkout. */
+#travel-planner .lb-saved-edit-bottom:not([hidden]) {
+  margin: 20px 0 18px;
+  padding: 16px 20px;
+  border-color: #b7cbb6;
+  background: #eaf1e7;
+}
+
+#travel-planner .lb-saved-edit-bottom .button {
+  min-width: 165px;
+  background: #173e34;
+  color: #fff;
+  border-color: #173e34;
+}
+
+#travel-planner .lb-saved-edit-bottom .button:hover {
+  background: #34705b;
+  color: #fff;
+}
+
+/* Responsive safeguards for the main pages and booking dialog. */
+@media (max-width: 1024px) {
+  .page-content .shell {
+    width: min(100% - 48px, 1200px);
+  }
+
+  .page-content :is(.intro, .story-section, .wetland-row, .wetland-intro, .about-lead, .faq-layout, .map-section) {
+    gap: clamp(20px, 4vw, 48px);
+  }
+
+  .page-content :is(.feature-grid, .activity-grid, .tips-grid, .fact-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page-content :is(.feature-card, .activity-card, .fact-grid article) {
+    min-width: 0;
+  }
+
+  #travel-planner .lb-payment-methods {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .page-content .shell {
+    width: calc(100% - 32px);
+  }
+
+  .page-content .section {
+    padding-block: 50px;
+  }
+
+  .page-content :is(.intro, .story-section, .wetland-row, .wetland-intro, .about-lead, .faq-layout, .map-section, .responsible > .shell, .travel-cta) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page-content :is(.feature-grid, .activity-grid, .tips-grid, .fact-grid, .transport-grid, .explore-grid) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page-content :is(.gallery-toolbar, .split-head) {
+    flex-wrap: wrap;
+  }
+
+  .page-content .preview-grid {
+    height: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+  }
+
+  .page-content .preview-card {
+    grid-column: auto;
+    grid-row: auto;
+    min-height: 230px;
+  }
+
+  .page-content .masonry {
+    columns: 2;
+  }
+
+  .page-content .travel-cta {
+    padding: 30px 22px;
+  }
+
+  .page-content .hero-copy {
+    width: 100%;
+  }
+
+  .page-content .hero-copy h1 {
+    font-size: clamp(34px, 8vw, 48px);
+  }
+
+  #travel-planner.modal {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  #travel-planner .modal-surface {
+    max-height: calc(100dvh - 20px);
+  }
+
+  #travel-planner .planner-heading {
+    padding: 30px 55px 16px 20px;
+  }
+
+  #travel-planner .planner-form,
+  #travel-planner .plan-result {
+    padding: 22px 20px;
+  }
+
+  #travel-planner :is(.form-grid, .activity-options, .plan-facts, .plan-activities) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #travel-planner .result-actions,
+  #travel-planner .planner-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #travel-planner .result-actions>*,
+  #travel-planner .planner-actions>.button {
+    width: 100%;
+  }
+
+  #travel-planner .lb-saved-edit-bottom .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .page-content .masonry {
+    columns: 1;
+  }
+
+  .page-content .preview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #travel-planner .lb-payment-methods {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #travel-planner .planner-steps {
+    gap: 6px;
+  }
+
+  #travel-planner .planner-steps span {
+    font-size: 10px;
+  }
+
+  #travel-planner .lb-booking-panel {
+    padding: 16px;
+  }
+}
+
+/* Form selects: same typography in location and package controls. */
+#travel-planner .planner-form :is(#plan-departure, #lb-booking-package) {
+  width: 100%;
+  min-height: 52px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #173e34;
+}
+
+#travel-planner .planner-form :is(#plan-departure, #lb-booking-package) option,
+#travel-planner .planner-form #lb-booking-package option {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 400 !important;
+}
+
+#travel-planner .planner-form :is(#plan-departure, #lb-booking-package) option:checked {
+  font-weight: 400 !important;
+}
+
+/* The initial payment choices remain compact; detailed institutions are grouped. */
+#travel-planner .lb-payment-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+#travel-planner .lb-payment-methods>button {
+  width: 100%;
+  min-height: 56px;
+}
+
+#travel-planner .lb-payment-extra {
+  min-width: 0;
+  margin-top: 16px;
+}
+
+#travel-planner .lb-payment-extra-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+#travel-planner .lb-method-category {
+  padding: 18px;
+  border: 1px solid #d2decf;
+  border-radius: 14px;
+  background: #fffefa;
+  min-width: 0;
+}
+
+#travel-planner .lb-method-category h5 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #173e34;
+  margin: 0 0 14px;
+}
+
+#travel-planner .lb-method-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#travel-planner .lb-method-choice-grid button {
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+  font-size: 13px;
+}
+
+/* Footer: explicit overrides for tablet and mobile viewports. */
+footer,
+footer * {
+  min-width: 0;
+}
+
+footer .footer-top,
+footer .footer-bottom,
+footer .footer-invitation {
+  max-width: 100%;
+}
+
+footer .footer-top p,
+footer .footer-bottom,
+footer .footer-invitation p {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1050px) {
+  footer .shell {
+    width: calc(100% - 48px);
+  }
+
+  footer .footer-top {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px;
+  }
+
+  footer .footer-note {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  footer .footer-invitation {
+    gap: 18px;
+  }
+
+  footer .footer-invitation p {
+    font-size: clamp(22px, 3vw, 30px);
+  }
+
+  footer .media-credits>div {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  footer .shell {
+    width: calc(100% - 32px);
+  }
+
+  footer .footer-invitation {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 24px;
+  }
+
+  footer .footer-invitation>span {
+    margin-bottom: 0;
+  }
+
+  footer .footer-invitation p {
+    font-size: 24px;
+    line-height: 1.35;
+  }
+
+  footer .footer-invitation button,
+  footer .footer-invitation a {
+    width: 100%;
+    min-height: 48px;
+    text-align: center;
+    justify-content: center;
+    margin-top: 6px;
+  }
+
+  footer .footer-top {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding-bottom: 24px;
+  }
+
+  footer .footer-brand>p {
+    max-width: 100%;
+  }
+
+  footer .footer-note {
+    border: 0;
+    padding: 0;
+  }
+
+  footer .footer-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  footer .media-credits>div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  footer .media-credits summary {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  #travel-planner .lb-method-choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 370px) {
+
+  #travel-planner .lb-payment-methods,
+  #travel-planner .lb-method-choice-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 641px) {
+  #travel-planner .lb-payment-methods {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #travel-planner .lb-payment-methods [data-payment-more] {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  #travel-planner .lb-payment-methods {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #travel-planner .lb-payment-methods [data-payment-more] {
+    grid-column: 1 / -1;
+  }
+}

@@ -32,27 +32,22 @@ const PACKAGES = [
 ];
 
 const PAYMENT_METHODS = [
-    { id: 'qris', label: 'QRIS', confirm: 'Konfirmasi Simulasi QRIS', type: 'qr' },
-    { id: 'dana', label: 'DANA', confirm: 'Konfirmasi Simulasi DANA', type: 'wallet' },
-    {
-        id: 'bsi',
-        label: 'BSI Virtual Account',
-        confirm: 'Konfirmasi Simulasi BSI',
-        type: 'va',
-        account: 'DEMO-BSI-001',
-    },
-    {
-        id: 'bri',
-        label: 'BRIVA',
-        confirm: 'Konfirmasi Simulasi BRI',
-        type: 'va',
-        account: 'DEMO-BRIVA-001',
-    },
-    { id: 'mandiri', label: 'Mandiri Virtual Account', confirm: 'Konfirmasi Simulasi Mandiri', type: 'va', account: 'DEMO-MANDIRI-001' },
-    { id: 'bni', label: 'BNI Virtual Account', confirm: 'Konfirmasi Simulasi BNI', type: 'va', account: 'DEMO-BNI-001' },
-    { id: 'gopay', label: 'GoPay', confirm: 'Konfirmasi Simulasi GoPay', type: 'wallet' },
-    { id: 'ovo', label: 'OVO', confirm: 'Konfirmasi Simulasi OVO', type: 'wallet' },
-    { id: 'shopeepay', label: 'ShopeePay', confirm: 'Konfirmasi Simulasi ShopeePay', type: 'wallet' },
+    { id: 'qris', label: 'QRIS', confirm: 'Selesaikan Pembayaran', type: 'qr' },
+    { id: 'cash', label: 'Cash / Tunai', confirm: 'Selesaikan Pembayaran', type: 'cash' },
+    { id: 'transfer', label: 'Transfer Bank', confirm: 'Pilih Bank', type: 'category' },
+    { id: 'bca', label: 'BCA', confirm: 'Selesaikan Pembayaran', type: 'bank' },
+    { id: 'bri', label: 'BRI', confirm: 'Selesaikan Pembayaran', type: 'bank' },
+    { id: 'bni', label: 'BNI', confirm: 'Selesaikan Pembayaran', type: 'bank' },
+    { id: 'mandiri', label: 'Mandiri', confirm: 'Selesaikan Pembayaran', type: 'bank' },
+    { id: 'bsi', label: 'BSI', confirm: 'Selesaikan Pembayaran', type: 'bank' },
+    { id: 'btn', label: 'BTN', confirm: 'Selesaikan Pembayaran', type: 'bank' },
+    { id: 'cimb', label: 'CIMB Niaga', confirm: 'Selesaikan Pembayaran', type: 'bank' },
+    { id: 'danamon', label: 'Danamon', confirm: 'Selesaikan Pembayaran', type: 'bank' },
+    { id: 'dana', label: 'DANA', confirm: 'Selesaikan Pembayaran', type: 'wallet' },
+    { id: 'gopay', label: 'GoPay', confirm: 'Selesaikan Pembayaran', type: 'wallet' },
+    { id: 'ovo', label: 'OVO', confirm: 'Selesaikan Pembayaran', type: 'wallet' },
+    { id: 'shopeepay', label: 'ShopeePay', confirm: 'Selesaikan Pembayaran', type: 'wallet' },
+    { id: 'linkaja', label: 'LinkAja', confirm: 'Selesaikan Pembayaran', type: 'wallet' },
 ];
 
 const rupiah = new Intl.NumberFormat('id-ID', {
@@ -214,9 +209,22 @@ function installStyles() {
 
         #travel-planner .lb-payment-methods {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
             margin: 12px 0;
+        }
+        #travel-planner .lb-payment-methods [data-payment-more] {
+            grid-column: 1 / -1;
+        }
+        @media (max-width: 640px) {
+            #travel-planner .lb-payment-methods {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 370px) {
+            #travel-planner .lb-payment-methods {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
 
         #travel-planner .lb-payment-methods .button {
@@ -387,34 +395,57 @@ function showPackageCatalog() {
     catalog.className = 'lb-package-catalog';
     catalog.dataset.lbPackageCatalog = '';
     catalog.innerHTML = `
-        <h2>Pilihan Paket dan Harga</h2>
-        <p>Bandingkan tujuan, titik kumpul, dan harga simulasi setiap paket.</p>
+        <div class="lb-catalog-heading">
+            <div>
+                <span class="lb-catalog-eyebrow">RENCANAKAN KUNJUNGAN</span>
+                <h2>Pilihan Paket dan Harga</h2>
+                <p>Pilih pengalaman yang sesuai dengan titik keberangkatan dan jumlah rombonganmu.</p>
+            </div>
+            <span class="lb-catalog-count">${String(PACKAGES.length).padStart(2, '0')} pilihan perjalanan</span>
+        </div>
         <div class="lb-package-grid"></div>
+        <p class="lb-catalog-disclaimer">Harga merupakan ilustrasi untuk proyek pembelajaran dan bukan penawaran resmi.</p>
     `;
 
     const grid = catalog.querySelector('.lb-package-grid');
-
-    for (const item of PACKAGES) {
+    for (const [index, item] of PACKAGES.entries()) {
         const card = document.createElement('article');
         card.className = 'lb-package-card';
-
-        const title = document.createElement('h3');
-        title.textContent = item.title;
-        card.append(title);
-
-        const infos = [
-            `Tujuan: ${item.destination}`,
-            `Titik kumpul: ${item.meeting}`,
-            `Waktu keberangkatan: ${item.time}`,
-            `Harga simulasi: ${money(item.price)} ${unit(item)}`,
-        ];
-
-        for (const info of infos) {
-            const paragraph = document.createElement('p');
-            paragraph.textContent = info;
-            card.append(paragraph);
-        }
-
+        card.innerHTML = `
+            <div class="lb-package-card-top">
+                <span class="lb-package-number">PAKET ${String(index + 1).padStart(2, '0')}</span>
+                <span class="lb-package-category">${item.capacity ? 'Sewa perahu' : 'Per orang'}</span>
+            </div>
+            <h3></h3>
+            <dl class="lb-package-info">
+                <div><dt>Tujuan</dt><dd data-package="destination"></dd></div>
+                <div><dt>Titik kumpul</dt><dd data-package="meeting"></dd></div>
+                <div><dt>Keberangkatan</dt><dd data-package="time"></dd></div>
+            </dl>
+            <div class="lb-package-footer">
+                <div class="lb-package-price"><small>Harga paket</small><strong data-package="price"></strong><span data-package="unit"></span></div>
+                <button type="button" class="lb-package-choose">Pilih Paket</button>
+            </div>
+        `;
+        card.querySelector('h3').textContent = item.title;
+        card.querySelector('[data-package="destination"]').textContent = item.destination;
+        card.querySelector('[data-package="meeting"]').textContent = item.meeting;
+        card.querySelector('[data-package="time"]').textContent = item.time;
+        card.querySelector('[data-package="price"]').textContent = money(item.price);
+        card.querySelector('[data-package="unit"]').textContent = unit(item);
+        card.querySelector('.lb-package-choose').addEventListener('click', () => {
+            const planner = document.getElementById('travel-planner');
+            if (!planner) return;
+            const select = planner.querySelector('#lb-booking-package');
+            if (select) {
+                select.value = item.id;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            planner.dispatchEvent(new CustomEvent('lb:catalog-select', { detail: { id: item.id } }));
+            const opener = document.querySelector('[data-open-planner]');
+            if (opener) opener.click();
+            else if (!planner.open && typeof planner.showModal === 'function') planner.showModal();
+        });
         grid.append(card);
     }
 
@@ -504,7 +535,7 @@ export function setupBookingDemo(planner) {
     const heading = planner.querySelector('.planner-heading > p');
     if (heading) {
         heading.textContent =
-            'Pilih paket dan cek harga simulasi sebelum membuat rencana perjalanan.';
+            'Pilih paket dan periksa rincian biaya sebelum membuat rencana perjalanan.';
     }
 
     steps.classList.add('lb-booking-steps');
@@ -539,7 +570,7 @@ export function setupBookingDemo(planner) {
                     <div><dt>Tujuan</dt><dd data-quote="destination"></dd></div>
                     <div><dt>Titik kumpul</dt><dd data-quote="meeting"></dd></div>
                     <div><dt>Waktu keberangkatan</dt><dd data-quote="time"></dd></div>
-                    <div><dt>Tarif simulasi</dt><dd data-quote="price"></dd></div>
+                    <div><dt>Tarif paket</dt><dd data-quote="price"></dd></div>
                 </dl>
                 <div class="lb-quote-bottom">
                     <span data-quote="calculation"></span>
@@ -561,12 +592,16 @@ export function setupBookingDemo(planner) {
                 <div><dt>Waktu keberangkatan</dt><dd data-summary="schedule"></dd></div>
                 <div><dt>Perhitungan</dt><dd data-summary="calculation"></dd></div>
             </dl>
-            <div class="lb-summary-total"><span>Total simulasi</span><strong data-summary="total"></strong></div>
+            <div class="lb-summary-total"><span>Total pembayaran</span><strong data-summary="total"></strong></div>
         </section>
         <p class="field-error" data-booking-error role="alert"></p>
+        <div class="lb-saved-edit lb-saved-edit-bottom" data-saved-edit hidden>
+            <span>Ingin memperbarui rencana yang tersimpan?</span>
+            <button type="button" class="button planner-outline" data-edit-saved-plan>Ubah Rencana</button>
+        </div>
         <div class="lb-prepayment-action">
             <button type="button" class="button primary" data-booking-start>Lanjut ke Pembayaran</button>
-            <p>Ini hanya simulasi, bukan transaksi atau pemesanan sebenarnya.</p>
+            <p>Mode demonstrasi. Tidak ada transaksi atau pemesanan sebenarnya.</p>
         </div>
     `);
 
@@ -576,21 +611,21 @@ export function setupBookingDemo(planner) {
     result.insertAdjacentHTML('afterend', `
         <section class="plan-result lb-booking-screen" data-booking-screen="payment" hidden>
             <div class="plan-result-top">
-                <span>TAHAP 03 · SIMULASI PEMBAYARAN</span>
+                <span>TAHAP 03 · PEMBAYARAN</span>
                 <h3 tabindex="-1">Pilih cara pembayaran</h3>
                 <p data-payment-summary></p>
             </div>
             <div class="lb-payment-amount">
-                <span>Total biaya simulasi</span>
+                <span>Total pembayaran</span>
                 <strong data-payment-total></strong>
-                <small>Seluruh pilihan di bawah hanya demonstrasi. Tidak ada uang yang ditransfer.</small>
+                <small>Mode demonstrasi — tidak ada dana yang dikirim atau diterima.</small>
             </div>
             <section class="lb-booking-panel lb-payment-panel" aria-labelledby="lb-payment-method-title">
                 <div class="lb-payment-heading">
                     <h4 id="lb-payment-method-title">Metode pembayaran</h4>
-                    <p>Pilih salah satu metode untuk melihat petunjuk simulasi.</p>
+                    <p>Pilih metode pembayaran yang diinginkan.</p>
                 </div>
-                <div class="lb-payment-methods" role="group" aria-label="Metode pembayaran simulasi">
+                <div class="lb-payment-methods" role="group" aria-label="Metode pembayaran">
                     ${PAYMENT_METHODS.slice(0, 3).map((method) => `
                         <button type="button" class="button planner-outline"
                             data-payment-method="${method.id}" aria-pressed="false">
@@ -601,14 +636,20 @@ export function setupBookingDemo(planner) {
                         aria-expanded="false" aria-controls="lb-payment-extra">Lainnya</button>
                 </div>
                 <div class="lb-payment-extra" id="lb-payment-extra" data-payment-extra hidden>
-                    <p>Pilihan metode lainnya</p>
+                    <p>Pilih bank atau dompet digital sesuai kebutuhan.</p>
                     <div class="lb-payment-extra-grid">
-                        ${PAYMENT_METHODS.slice(3).map((method) => `
-                            <button type="button" class="button planner-outline"
-                                data-payment-method="${method.id}" aria-pressed="false">
-                                ${method.label}
-                            </button>
-                        `).join('')}
+                        <div class="lb-method-category"><h5>Transfer Bank</h5><div class="lb-method-choice-grid">
+                            ${PAYMENT_METHODS.filter((method) => method.type === 'bank').map((method) => `
+                                <button type="button" class="button planner-outline"
+                                    data-payment-method="${method.id}" aria-pressed="false">${method.label}</button>
+                            `).join('')}
+                        </div></div>
+                        <div class="lb-method-category"><h5>E-Wallet</h5><div class="lb-method-choice-grid">
+                            ${PAYMENT_METHODS.filter((method) => method.type === 'wallet').map((method) => `
+                                <button type="button" class="button planner-outline"
+                                    data-payment-method="${method.id}" aria-pressed="false">${method.label}</button>
+                            `).join('')}
+                        </div></div>
                     </div>
                 </div>
                 <div class="lb-payment-details" data-payment-details hidden>
@@ -621,7 +662,7 @@ export function setupBookingDemo(planner) {
             <div class="lb-payment-actions">
                 <button type="button" class="button planner-outline" data-booking-back>Kembali ke Ringkasan</button>
                 <button type="button" class="button primary" data-payment-confirm disabled>
-                    Konfirmasi Simulasi
+                    Konfirmasi Pembayaran
                 </button>
             </div>
         </section>
@@ -644,11 +685,11 @@ export function setupBookingDemo(planner) {
                             ${ticketRow('meeting', 'Titik kumpul')}
                             ${ticketRow('code', 'Kode tiket')}
                             ${ticketRow('method', 'Metode pembayaran')}
-                            ${ticketRow('total', 'Total simulasi')}
+                            ${ticketRow('total', 'Total pembayaran')}
                         </div>
                     </div>
 
-                    <p class="lb-ticket-caption">Tiket demo · Lok Baintan Explorer</p>
+                    <p class="lb-ticket-caption">Tiket digital demo · Lok Baintan Explorer</p>
                 </div>
 
                 <div class="lb-ticket-downloads">
@@ -678,6 +719,14 @@ export function setupBookingDemo(planner) {
     const startButton = result.querySelector('[data-booking-start]');
     const editButton = result.querySelector('[data-edit-plan]');
     const savedButton = planner.querySelector('[data-open-saved-from-form]');
+
+    result.querySelector('.plan-result-top')?.insertAdjacentHTML('afterend', `
+        <div class="lb-saved-edit" data-saved-edit hidden>
+            <span>Rencana tersimpan dapat disesuaikan kembali.</span>
+            <button type="button" class="button planner-outline" data-edit-saved-plan>Ubah Rencana</button>
+        </div>
+    `);
+    const savedEdits = [...result.querySelectorAll('[data-saved-edit]')];
 
     const payment = planner.querySelector('[data-booking-screen="payment"]');
     const paymentDetails = payment.querySelector('[data-payment-details]');
@@ -716,6 +765,42 @@ export function setupBookingDemo(planner) {
     function getPlan() {
         return JSON.parse(planner.dataset.currentPlan || 'null');
     }
+
+    function restoreInputs(plan) {
+        if (!plan) return;
+        nameInput.value = plan.bookingName || '';
+        packageSelect.value = findPackage(plan.bookingPackageId) ? plan.bookingPackageId : '';
+        form.elements.date.value = plan.date || '';
+        form.elements.visitors.value = plan.visitors || 1;
+        const departureOption = [...form.elements.departure.options].find((option) =>
+            option.dataset.query === plan.departureQuery ||
+            option.textContent.trim() === (plan.departure || '').trim(),
+        );
+        if (departureOption) form.elements.departure.value = departureOption.value;
+        form.querySelectorAll('[name="activities[]"]').forEach((checkbox) => {
+            checkbox.checked = (plan.activities || []).includes(checkbox.value);
+            checkbox.closest('label')?.classList.toggle('selected', checkbox.checked);
+        });
+        form.elements.notes.value = plan.notes || '';
+        packageSelect.classList.toggle('has-selection', Boolean(packageSelect.value));
+        renderQuote();
+    }
+
+    const editSavedPlan = () => {
+        restoreInputs(getPlan());
+        order = null;
+        bookingError.textContent = '';
+        showStep('form');
+        form.elements.date.focus();
+    };
+    savedEdits.forEach((container) => {
+        container.querySelector('[data-edit-saved-plan]')?.addEventListener('click', editSavedPlan);
+    });
+
+    planner.addEventListener('lb:catalog-select', () => {
+        order = null;
+        showStep('form');
+    });
 
     function showStep(step) {
         form.hidden = step !== 'form';
@@ -800,7 +885,7 @@ export function setupBookingDemo(planner) {
         paymentDetails.hidden = true;
         paymentInstructions.replaceChildren();
         confirmButton.disabled = true;
-        confirmButton.textContent = 'Simulasikan Pembayaran Berhasil';
+        confirmButton.textContent = 'Selesaikan Pembayaran';
         paymentFeedback.textContent = 'Pilih metode pembayaran untuk melanjutkan.';
         extraMethods.hidden = true;
         moreButton.setAttribute('aria-expanded', 'false');
@@ -822,59 +907,52 @@ export function setupBookingDemo(planner) {
 
         payment.querySelector('[data-payment-method-name]').textContent = method.label;
         payment.querySelector('[data-payment-method-amount]').textContent =
-            `Total simulasi: ${order.total}`;
+            `Total pembayaran: ${order.total}`;
 
         paymentDetails.hidden = false;
         paymentFeedback.textContent = '';
         confirmButton.disabled = false;
         confirmButton.textContent = method.confirm;
 
-        if (id === 'qris') {
+        if (method.type === 'category') {
+            extraMethods.hidden = false;
+            moreButton.setAttribute('aria-expanded', 'true');
+            paymentDetails.hidden = false;
+            confirmButton.disabled = true;
+            paymentInstructions.innerHTML = `
+                <p>Pilih salah satu bank di bagian <strong>Transfer Bank</strong> pada menu di bawah.</p>
+            `;
+            return;
+        }
+
+        if (method.type === 'qr') {
             paymentInstructions.innerHTML = `
                 ${QR_DEMO}
-                <p class="lb-payment-helper">QR di atas hanya ilustrasi. Tidak dapat digunakan untuk transaksi.</p>
-                <ol class="lb-payment-instruction-list"><li>Periksa nominal simulasi.</li><li>Konfirmasi untuk menerbitkan tiket demo.</li></ol>
-            `;
-            return;
-        }
-
-        if (method.type === 'wallet') {
-            paymentInstructions.innerHTML = `
-                <p><strong>Dompet digital:</strong> ${method.label}</p>
-                <p>Ini adalah pilihan simulasi. Tidak ada tautan ke aplikasi atau penarikan saldo.</p>
+                <p class="lb-payment-helper">QR ilustrasi untuk demonstrasi. Tidak dapat digunakan untuk membayar.</p>
                 <ol class="lb-payment-instruction-list">
-                    <li>Pastikan nominal simulasi sudah sesuai.</li>
-                    <li>Tekan konfirmasi untuk membuat tiket demo.</li>
+                    <li>Pastikan rincian pembayaran sesuai.</li>
+                    <li>Pilih selesaikan untuk menerbitkan tiket demonstrasi.</li>
                 </ol>
             `;
-            return;
+        } else if (method.type === 'cash') {
+            paymentInstructions.innerHTML = `
+                <p><strong>Cash / Tunai</strong></p>
+                <p>Pembayaran tunai dilakukan langsung kepada petugas di lokasi pada layanan nyata.</p>
+                <p class="lb-payment-helper">Dalam website pembelajaran ini, tombol selesai hanya menerbitkan tiket demo tanpa pembayaran.</p>
+            `;
+        } else if (method.type === 'wallet') {
+            paymentInstructions.innerHTML = `
+                <p><strong>E-Wallet:</strong> ${method.label}</p>
+                <p>Periksa nama penyedia dan nominal pembayaran sebelum melanjutkan.</p>
+                <p class="lb-payment-helper">Tidak terhubung dengan aplikasi ${method.label} dan tidak memotong saldo.</p>
+            `;
+        } else if (method.type === 'bank') {
+            paymentInstructions.innerHTML = `
+                <p><strong>Bank yang dipilih:</strong> ${method.label}</p>
+                <p>Metode transfer bank dipilih. Nomor rekening hanya tersedia setelah integrasi pembayaran resmi.</p>
+                <p class="lb-payment-helper">Tidak tersedia rekening tujuan dan tidak ada dana yang ditransfer pada mode demo ini.</p>
+            `;
         }
-
-        paymentInstructions.innerHTML = `
-            <p><strong>Virtual Account simulasi:</strong> <code data-demo-account></code></p>
-            <button type="button" class="button planner-outline" data-copy-account>Salin Nomor Demo</button>
-            <p class="lb-payment-helper">Nomor ini hanya untuk simulasi, bukan rekening pembayaran.</p>
-        `;
-
-        paymentInstructions.querySelector('[data-demo-account]').textContent = method.account;
-
-        paymentInstructions.querySelector('[data-copy-account]').addEventListener(
-            'click',
-            async () => {
-                const selectedOrder = order;
-
-                try {
-                    await navigator.clipboard.writeText(method.account);
-                    if (order === selectedOrder && order.method?.id === id) {
-                        paymentFeedback.textContent = 'Nomor demo disalin.';
-                    }
-                } catch {
-                    if (order === selectedOrder && order.method?.id === id) {
-                        paymentFeedback.textContent = 'Salin nomor demo secara manual dari layar.';
-                    }
-                }
-            },
-        );
     }
 
     nameInput.addEventListener('input', () => {
@@ -908,18 +986,25 @@ export function setupBookingDemo(planner) {
         });
     }
 
-    planner.addEventListener('lb:plan-ready', () => {
+    planner.addEventListener('lb:plan-ready', (event) => {
         const plan = getPlan();
         if (!plan) return;
-
-        planner.dataset.currentPlan = JSON.stringify({
+        const saved = Boolean(event.detail?.isSaved);
+        if (saved) restoreInputs(plan);
+        const currentPlan = {
             ...plan,
-            bookingName: nameInput.value.trim(),
-            bookingPackageId: packageSelect.value,
-        });
-
+            bookingName: saved ? (plan.bookingName || '') : nameInput.value.trim(),
+            bookingPackageId: saved ? (plan.bookingPackageId || '') : packageSelect.value,
+        };
+        planner.dataset.currentPlan = JSON.stringify(currentPlan);
         order = null;
         renderSummary();
+        const missingBooking = !currentPlan.bookingName || !findPackage(currentPlan.bookingPackageId);
+        savedEdits.forEach((container) => { container.hidden = !saved && !missingBooking; });
+        if (saved && missingBooking) {
+            bookingError.textContent = 'Rencana tersimpan belum memiliki nama pemesan atau paket. Tekan Ubah Rencana untuk melengkapinya.';
+        }
+        showStep('result');
     });
 
     editButton?.addEventListener('click', () => {
@@ -949,8 +1034,10 @@ export function setupBookingDemo(planner) {
 
         if (!plan.bookingName || !item) {
             bookingError.textContent =
-                'Lengkapi nama dan pilihan paket melalui tombol Ubah Rencana.';
-            editButton?.focus();
+                'Nama pemesan atau paket belum lengkap. Tekan Ubah Rencana untuk melengkapinya.';
+            savedEdits.forEach((container) => { container.hidden = false; });
+            const editControl = result.querySelector('.lb-saved-edit-bottom [data-edit-saved-plan]');
+            editControl?.focus();
             return;
         }
 

@@ -1,5 +1,6 @@
 import { setupBookingDemo } from './booking-demo.js';
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+const cleanPlanSentence = (value) => String(value ?? '').replace(/;\s*/g, '. ');
 
 function openDialog(dialog) {
     if (!dialog) return;
@@ -219,10 +220,10 @@ function initializePage() {
                 const number = document.createElement('span');
                 const text = document.createElement('p');
                 number.textContent = String(index + 1).padStart(2, '0');
-                text.textContent = value;
+                text.textContent = cleanPlanSentence(value);
                 item.append(number, text);
             } else {
-                item.textContent = value;
+                item.textContent = cleanPlanSentence(value);
             }
             return item;
         }));
@@ -232,7 +233,7 @@ function initializePage() {
         const result = planner.querySelector('#plan-result');
         const disclaimer = result.querySelector('.plan-disclaimer');
         if (disclaimer) {
-            disclaimer.textContent = 'Panduan pribadi, bukan pemesanan. Rencana hanya disimpan di browser ini jika Anda memilih Simpan Rencana; tidak ada jadwal, harga, atau ketersediaan yang dijamin.';
+            disclaimer.textContent = 'Panduan pribadi, bukan pemesanan. Rencana hanya disimpan di browser ini jika Anda memilih Simpan Rencana. Tidak ada jadwal, harga, atau ketersediaan yang dijamin.';
         }
         const dateInput = form.elements.date;
         const savedEntry = planner.querySelector('[data-open-saved-from-form]');
@@ -342,7 +343,7 @@ function initializePage() {
             const dateLabel = new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' })
                 .format(new Date(`${date}T12:00:00`));
             const preparation = [
-                'Periksa cuaca dan kondisi akses sebelum berangkat; aktivitas pasar mengikuti keadaan setempat.',
+                'Periksa cuaca dan kondisi akses sebelum berangkat. Aktivitas pasar mengikuti keadaan setempat.',
                 'Bawa uang tunai pecahan kecil, air minum, pelindung hujan, dan tas tahan percikan.',
                 'Minta izin sebelum memotret, beri ruang untuk pedagang, dan bawa kembali sampah.',
             ];
@@ -353,7 +354,7 @@ function initializePage() {
                 preparation.push('Jika ingin mencoba jukung, konfirmasikan kepada warga atau pendamping setempat, pastikan perlengkapan keselamatan, dan ikuti arahan pendamping.');
             }
             if (activities.includes('Mengenal kuliner khas Banjar')) {
-                preparation.push('Tanyakan bahan makanan kepada pedagang jika memiliki alergi; pilihan kuliner mengikuti sajian yang tersedia.');
+                preparation.push('Tanyakan bahan makanan kepada pedagang jika memiliki alergi. Pilihan kuliner mengikuti sajian yang tersedia.');
             }
             const sequence = [
                 'Datang pada pagi hari setelah memeriksa cuaca dan akses terakhir ke tepian sungai.',
@@ -398,7 +399,7 @@ function initializePage() {
                 ['Datang & orientasi', 'Konfirmasi kondisi akses dan titik berkumpul pada hari kunjungan.'],
                 ...plan.activities.map((activity) => [
                     activity,
-                    'Ikuti ritme aktivitas dengan santun; durasi mengikuti kesepakatan lapangan.',
+                    'Ikuti ritme aktivitas dengan santun. Durasi mengikuti kesepakatan lapangan.',
                 ]),
                 ['Kumpul & pulang', 'Periksa barang bawaan dan bawa kembali sampah pribadi.'],
             ];
@@ -412,7 +413,7 @@ function initializePage() {
                 const description = document.createElement('p');
                 number.textContent = String(index + 1).padStart(2, '0');
                 heading.textContent = title;
-                description.textContent = detail;
+                description.textContent = cleanPlanSentence(detail);
                 contents.append(heading, description);
                 li.append(number, contents);
                 return li;
@@ -454,7 +455,7 @@ function initializePage() {
             if (surface) surface.scrollTop = 0;
             result.scrollTop = 0;
             result.querySelector('h3')?.focus({ preventScroll: true });
-            planner.dispatchEvent(new CustomEvent('lb:plan-ready'));
+            planner.dispatchEvent(new CustomEvent('lb:plan-ready', { detail: { isSaved } }));
         }
         const restoreSaved = () => {
             const plan = getSavedPlan();

@@ -6,6 +6,7 @@
         ['id' => 'lahan-basah', 'label' => 'Pesona Lahan Basah', 'route' => 'wetlands'],
         ['id' => 'galeri', 'label' => 'Galeri', 'route' => 'gallery'],
         ['id' => 'panduan', 'label' => 'Panduan Berkunjung', 'route' => 'guide'],
+        ['id' => 'tim-pengembang', 'label' => 'Tim Pengembang', 'route' => 'developers'],
     ];
 @endphp
 <header class="header">

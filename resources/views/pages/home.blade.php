@@ -52,6 +52,36 @@
             <p>Saksikan jukung-jukung kayu berkumpul, sarat dengan buah tropis, sayuran, kue tradisional, dan kisah yang
                 diwariskan dari generasi ke generasi.</p><a class="text-link" href="{{ route('about') }}">Kenali Lok
                 Baintan</a>
+            <div class="intro-comment-divider" aria-hidden="true"></div>
+            @php
+                $commentPreviews = $comments->getCollection()->filter(fn($item) => !$item->trashed())->take(3);
+            @endphp
+            @if ($commentPreviews->isNotEmpty())
+                <aside class="home-comment-preview" aria-label="Komentar terbaru dari pengunjung">
+                    <div class="home-comment-preview-top">
+                        <strong><x-icon name="people" :size="19" /> Cerita Pengunjung</strong>
+                        <a href="#komentar-pengunjung">Lihat Semua Komentar</a>
+                    </div>
+                    <div class="home-comment-preview-items">
+                        @foreach ($commentPreviews as $comment)
+                            <a class="home-comment-preview-item" href="#komentar-{{ $comment->id }}">
+                                <span class="home-comment-avatar"
+                                    aria-hidden="true">{{ mb_strtoupper(mb_substr($comment->author_name, 0, 1)) }}</span>
+                                <span class="home-comment-preview-copy">
+                                    <strong>{{ $comment->author_name }}</strong>
+                                    <span>{{ \Illuminate\Support\Str::limit($comment->body, 120) }}</span>
+                                </span>
+                                @if ($comment->media_path && $comment->media_mime && str_starts_with($comment->media_mime, 'image/'))
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($comment->media_path) }}"
+                                        alt="Foto komentar" loading="lazy">
+                                @elseif ($comment->media_path && $comment->media_mime && str_starts_with($comment->media_mime, 'video/'))
+                                    <span class="home-comment-video" aria-label="Komentar berisi video">▶</span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                </aside>
+            @endif
         </div>
     </section>
     <section class="features section">
@@ -121,5 +151,104 @@
             <p>Persiapkan pagi yang berbeda di antara jukung, riak sungai, dan keramahan masyarakat Banjar.</p><button
                 class="button light" type="button" data-open-planner>Rencanakan Kunjungan</button>
         </div>
+    </section>
+    <section class="section shell visitor-comments" id="komentar-pengunjung" aria-label="Komentar Pengunjung">
+        <div class="visitor-comments-heading">
+            <x-section-head eyebrow="Cerita dari Pengunjung" title="Komentar Pengunjung" />
+            <p>Bagikan pengalaman atau pertanyaan tentang kunjunganmu. Nama pengguna dapat kamu isi sendiri. Bagikan
+                pengalaman, kesan, atau pertanyaan dengan santun.</p>
+        </div>
+        @if (session('comment_status'))
+            <div class="comment-toast" data-comment-toast role="status">
+                <span class="comment-toast-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                </span>
+                <span class="comment-toast-message">{{ session('comment_status') }}</span>
+                <button class="comment-toast-close" type="button" data-comment-toast-close
+                    aria-label="Tutup pemberitahuan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        @endif
+        @if ($errors->any())
+            <div class="comment-alert error" role="alert">
+                <p>Periksa kembali informasi berikut:</p>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        <p class="comment-upload-notice">
+            Unggah foto maksimal 5 MB atau video maksimal 25 MB (opsional).
+            @if (!$commentUploadLimits['photos_supported'])
+                Unggahan foto belum didukung konfigurasi server saat ini.
+            @endif
+            @if (!$commentUploadLimits['videos_supported'])
+                Unggahan video 25 MB belum didukung server. Pengelola hosting perlu menaikkan upload_max_filesize dan
+                post_max_size.
+            @endif
+            @if (!$commentUploadLimits['storage_linked'])
+                Media tersimpan, tetapi belum dapat ditampilkan sampai pengelola menjalankan php artisan storage:link.
+            @endif
+        </p>
+        <h3 class="comment-form-title">Tinggalkan Komentar</h3>
+        <form class="comment-form" action="{{ route('comments.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <label class="comment-honeypot" aria-hidden="true">Jangan isi kolom ini
+                <input type="text" name="website" tabindex="-1" autocomplete="off">
+            </label>
+            <label>Nama pengguna
+                <input type="text" name="name" placeholder="Masukkan nama pengguna" autocomplete="nickname"
+                    maxlength="100" required value="{{ old('parent_id') ? '' : old('name') }}">
+            </label>
+            <label>Komentar
+                <textarea name="body" rows="4" maxlength="5000" placeholder="Tulis pengalaman atau pertanyaanmu di sini..."
+                    required>{{ old('parent_id') ? '' : old('body') }}</textarea>
+            </label>
+            <div class="comment-form-actions">
+                <div class="comment-upload-control">
+                    <button class="button planner-outline" type="button" data-comment-media>Unggah Media</button>
+                    <input class="comment-file-input" type="file" name="media"
+                        accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" data-comment-file>
+                    <span data-comment-file-name>Opsional · foto 5 MB, video 25 MB</span>
+                </div>
+                <div class="comment-submit-actions">
+                    <button class="button planner-outline" type="reset">Batal</button>
+                    <button class="button primary" type="submit">Kirim</button>
+                </div>
+            </div>
+        </form>
+        <div class="visitor-comment-list" aria-live="polite">
+            @forelse ($comments as $comment)
+                @include('components.comments.thread', ['comment' => $comment, 'depth' => 0])
+            @empty
+                <p class="comment-empty">Belum ada komentar. Jadilah pengunjung pertama yang berbagi cerita.</p>
+            @endforelse
+        </div>
+        @if ($comments->hasPages())
+            <nav class="comment-pagination" aria-label="Halaman komentar">
+                {{ $comments->links() }}
+            </nav>
+        @endif
+        <dialog class="comment-delete-dialog" id="comment-delete-dialog" aria-labelledby="comment-delete-title">
+            <div class="comment-delete-dialog-inner">
+                <span class="comment-delete-symbol" aria-hidden="true">✕</span>
+                <h3 id="comment-delete-title">Yakin ingin menghapus komentar ini?</h3>
+                <p>Komentar akan dihapus dari daftar pengunjung. Balasan orang lain tetap terjaga.</p>
+                <div class="comment-delete-dialog-actions">
+                    <button type="button" class="button planner-outline" data-comment-delete-cancel>Batal</button>
+                    <button type="button" class="button comment-delete-confirm"
+                        data-comment-delete-confirm>Hapus</button>
+                </div>
+            </div>
+        </dialog>
     </section>
 @endsection

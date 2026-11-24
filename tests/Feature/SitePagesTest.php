@@ -48,6 +48,18 @@ class SitePagesTest extends TestCase
             ->assertSee('Keselamatan dan etika kunjungan');
     }
 
+    public function test_developer_team_has_exactly_three_editable_placeholder_profiles(): void
+    {
+        $response = $this->get(route('developers'))
+            ->assertOk()
+            ->assertSee('Tim Pengembang Lok Baintan Explorer')
+            ->assertSee('Nama anggota 1 (placeholder)')
+            ->assertSee('Nama anggota 2 (placeholder)')
+            ->assertSee('Nama anggota 3 (placeholder)');
+
+        $this->assertSame(3, substr_count($response->getContent(), 'class="developer-card"'));
+    }
+
     public static function pages(): array
     {
         return [
@@ -57,6 +69,7 @@ class SitePagesTest extends TestCase
             ['wetlands', 'Pesona Lahan Basah: Kehidupan yang Mengalir Bersama Sungai'],
             ['gallery', 'Galeri Pesona Lok Baintan'],
             ['guide', 'Panduan Berkunjung ke Lok Baintan'],
+            ['developers', 'Tim Pengembang Lok Baintan Explorer'],
         ];
     }
 

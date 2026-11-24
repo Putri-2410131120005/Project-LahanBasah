@@ -6,6 +6,7 @@
         ['Pesona Lahan Basah', 'wetlands'],
         ['Galeri', 'gallery'],
         ['Panduan Berkunjung', 'guide'],
+        ['Tim Pengembang', 'developers'],
     ];
 @endphp
 <footer>

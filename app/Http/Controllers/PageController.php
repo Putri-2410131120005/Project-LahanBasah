@@ -2,13 +2,66 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
+use App\Support\CommentOwnerIdentity;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function home(): View
+    public function home(Request $request): View
     {
-        return $this->page('pages.home', 'beranda');
+        $data = $this->siteData();
+        $data['page'] = 'beranda';
+        $data['comments'] = $this->visitorComments($request);
+        $data['commentModerator'] = $request->session()->get('comments_moderator') === true;
+        $data['commentUploadLimits'] = $this->commentUploadLimits();
+
+        return view('pages.home', $data);
+    }
+
+    public function developers(): View
+    {
+        $data = $this->siteData();
+        $data['page'] = 'tim-pengembang';
+        $data['developers'] = [
+            [
+                'name' => 'Fatimah Az Zahra',
+                'nim' => '2410131120003',
+                'program' => 'Pendidikan Komputer',
+                'faculty' => 'FKIP, Universitas Lambung Mangkurat',
+                'role' => 'UI/UX Designer & Web Developer',
+                'description' => 'Mengembangkan ide dan konsep Lok Baintan Explorer, menyusun materi edukasi, merancang antarmuka dan pengalaman pengguna, serta mengembangkan website bersama tim.',
+                'image' => file_exists(public_path('media/developers/Fatimah Az Zahra.jpg'))
+                    ? asset('media/developers/Fatimah Az Zahra.jpg')
+                    : asset('media/developer-placeholder.svg'),
+            ],
+            [
+                'name' => 'Putri Fatimatul Amalia',
+                'nim' => '2410131120005',
+                'program' => 'Pendidikan Komputer',
+                'faculty' => 'FKIP, Universitas Lambung Mangkurat',
+                'role' => 'UI/UX Designer & Web Developer',
+                'description' => 'Merancang desain tampilan dan pengalaman pengguna, menyusun materi informasi dan edukasi, serta berkolaborasi dalam pengembangan website Lok Baintan Explorer.',
+                'image' => file_exists(public_path('media/developers/Putri Fatimatul Amalia.jpg'))
+                    ? asset('media/developers/Putri Fatimatul Amalia.jpg')
+                    : asset('media/developer-placeholder.svg'),
+            ],
+            [
+                'name' => 'Nur Laily Azkiya',
+                'nim' => '2410131220033',
+                'program' => 'Pendidikan Komputer',
+                'faculty' => 'FKIP, Universitas Lambung Mangkurat',
+                'role' => 'UI/UX Designer & Web Developer',
+                'description' => 'Menyusun dan mengorganisasi materi edukasi, berkontribusi dalam perancangan antarmuka dan pengalaman pengguna, serta mengembangkan website bersama tim.',
+                'image' => file_exists(public_path('media/developers/Nur Laily Azkiya.jpg'))
+                    ? asset('media/developers/Nur Laily Azkiya.jpg')
+                    : asset('media/developer-placeholder.svg'),
+            ],
+        ];
+
+        return view('pages.developers', $data);
     }
 
     public function about(): View
@@ -60,6 +113,82 @@ class PageController extends Controller
         return view($view, $data);
     }
 
+    private function visitorComments(Request $request): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $comments = Comment::withTrashed()
+            ->whereNull('parent_id')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(10, ['*'], 'comments');
+        $ownerHash = CommentOwnerIdentity::hash($request);
+        $isModerator = $request->session()->get('comments_moderator') === true;
+        $frontier = $comments->getCollection();
+
+        for ($depth = 0; $depth <= 5 && $frontier->isNotEmpty(); $depth++) {
+            foreach ($frontier as $comment) {
+                $comment->setAttribute(
+                    'can_delete',
+                    $isModerator || (is_string($comment->owner_token_hash)
+                        && hash_equals($comment->owner_token_hash, $ownerHash)),
+                );
+            }
+
+            $replies = Comment::withTrashed()
+                ->whereIn('parent_id', $frontier->modelKeys())
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get();
+            $repliesByParent = $replies->groupBy('parent_id');
+
+            foreach ($frontier as $comment) {
+                $comment->setRelation(
+                    'replies',
+                    $repliesByParent->get($comment->getKey(), new EloquentCollection()),
+                );
+            }
+
+            $frontier = $replies;
+        }
+
+        return $comments;
+    }
+
+    private function commentUploadLimits(): array
+    {
+        $uploadLimit = (string) ini_get('upload_max_filesize');
+        $postLimit = (string) ini_get('post_max_size');
+        $uploadBytes = $this->iniBytes($uploadLimit);
+        $postBytes = $this->iniBytes($postLimit);
+        $postAllowsPhoto = $postBytes === 0 || $postBytes >= 6 * 1024 * 1024;
+        $postAllowsVideo = $postBytes === 0 || $postBytes >= 26 * 1024 * 1024;
+
+        return [
+            'upload' => $uploadLimit,
+            'post' => $postLimit,
+            'storage_linked' => file_exists(public_path('storage')),
+            'photos_supported' => $uploadBytes >= 5 * 1024 * 1024 && $postAllowsPhoto,
+            'videos_supported' => $uploadBytes >= 25 * 1024 * 1024 && $postAllowsVideo,
+        ];
+    }
+
+    private function iniBytes(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return 0;
+        }
+
+        $unit = strtolower(substr($value, -1));
+        $size = (int) $value;
+
+        return match ($unit) {
+            'g' => $size * 1024 * 1024 * 1024,
+            'm' => $size * 1024 * 1024,
+            'k' => $size * 1024,
+            default => $size,
+        };
+    }
+
     private function siteData(): array
     {
         $images = [
@@ -84,28 +213,36 @@ class PageController extends Controller
             [
                 'title' => 'Menyaksikan Aktivitas Pasar Terapung',
                 'short' => 'Lihat para pedagang mengayuh jukung berisi hasil kebun dan kuliner Banjar di tengah riuh pagi.',
-                'image' => $images['hero'], 'tag' => 'Budaya & Tradisi', 'time' => 'Pagi hari',
+                'image' => $images['hero'],
+                'tag' => 'Budaya & Tradisi',
+                'time' => 'Pagi hari',
                 'experience' => 'Melihat hasil kebun berpindah dari jukung ke jukung, mendengar tawar-menawar, dan menyapa pedagang dengan santun.',
                 'preparation' => 'Siapkan uang tunai pecahan kecil dan minta izin sebelum memotret. Jangan menghalangi perahu yang sedang berdagang.',
             ],
             [
                 'title' => 'Menyusuri Sungai dengan Klotok',
                 'short' => 'Rasakan perjalanan menyusuri Martapura, melintasi rumah panggung dan kehidupan tepian sungai.',
-                'image' => $images['klotok'], 'tag' => 'Susur Sungai', 'time' => 'Pagi–siang',
+                'image' => $images['klotok'],
+                'tag' => 'Susur Sungai',
+                'time' => 'Pagi–siang',
                 'experience' => 'Mengamati rumah tepian sungai, perahu warga, dan pepohonan dari klotok yang menyusuri aliran Martapura.',
                 'preparation' => 'Konfirmasikan titik berangkat dan rute dengan operator setempat. Ikuti arahan awak, jaga keseimbangan, dan gunakan pelampung bila tersedia.',
             ],
             [
                 'title' => 'Mengenal Kuliner Khas Banjar',
                 'short' => 'Temukan wadai tradisional, buah segar, dan cita rasa lokal yang dijajakan langsung dari jukung.',
-                'image' => $images['fruit'], 'tag' => 'Kuliner', 'time' => 'Pagi hari',
+                'image' => $images['fruit'],
+                'tag' => 'Kuliner',
+                'time' => 'Pagi hari',
                 'experience' => 'Mengenali wadai Banjar, bertanya tentang sajian yang tersedia, serta melihat buah dan hasil kebun yang dibawa pedagang.',
                 'preparation' => 'Bawa uang tunai secukupnya. Tanyakan bahan makanan bila memiliki alergi dan bawa wadah guna ulang bila memungkinkan.',
             ],
             [
                 'title' => 'Menikmati Suasana Pagi di Sungai Martapura',
                 'short' => 'Saksikan kabut tipis dan cahaya keemasan membingkai aktivitas sungai yang perlahan terbangun.',
-                'image' => $images['morning'], 'tag' => 'Fotografi', 'time' => 'Fajar',
+                'image' => $images['morning'],
+                'tag' => 'Fotografi',
+                'time' => 'Fajar',
                 'experience' => 'Menikmati perubahan cahaya di permukaan air dan menyaksikan kehidupan sungai berangsur ramai menjelang pagi.',
                 'preparation' => 'Periksa cuaca sebelum berangkat, lindungi kamera dari percikan air, dan gunakan pakaian yang nyaman untuk perjalanan pagi.',
             ],
@@ -171,10 +308,13 @@ class PageController extends Controller
 
         $wetlandLessons = [
             [
-                'number' => '01', 'slug' => 'sungai-martapura-dan-lingkungan-lahan-basah',
-                'eyebrow' => 'Bentang Air', 'title' => 'Sungai Martapura dan lingkungan lahan basah',
+                'number' => '01',
+                'slug' => 'sungai-martapura-dan-lingkungan-lahan-basah',
+                'eyebrow' => 'Bentang Air',
+                'title' => 'Sungai Martapura dan lingkungan lahan basah',
                 'intro' => 'Memahami sungai sebagai bagian dari ekosistem yang menyimpan air, mendukung kehidupan, dan membentuk ruang hidup masyarakat.',
-                'image' => $images['panorama'], 'image_alt' => 'Bentang hijau di sepanjang Sungai Martapura',
+                'image' => $images['panorama'],
+                'image_alt' => 'Bentang hijau di sepanjang Sungai Martapura',
                 'sections' => [
                     ['title' => 'Apa yang dimaksud lahan basah?', 'body' => 'Lahan basah adalah wilayah yang dipengaruhi keberadaan air, baik secara tetap maupun musiman. Rawa, tepian sungai, genangan, dan dataran banjir memiliki tanah, tumbuhan, serta hewan yang beradaptasi dengan kondisi basah.'],
                     ['title' => 'Satu sistem yang saling terhubung', 'body' => 'Sungai Martapura tidak berdiri sendiri. Alirannya berhubungan dengan tepian, vegetasi, permukiman, kebun, dan jalur air lain di Kalimantan Selatan. Ketika air membawa sedimen atau sampah, dampaknya dapat dirasakan oleh bagian ekosistem yang lain.'],
@@ -186,10 +326,13 @@ class PageController extends Controller
                 'conclusion' => 'Sungai Martapura adalah bagian dari lingkungan lahan basah sekaligus ruang hidup. Menjaganya berarti menjaga habitat, jalur mobilitas, dan keberlanjutan kehidupan masyarakat Lok Baintan.',
             ],
             [
-                'number' => '02', 'slug' => 'sungai-sebagai-jalur-kehidupan',
-                'eyebrow' => 'Mobilitas', 'title' => 'Sungai sebagai jalur kehidupan',
+                'number' => '02',
+                'slug' => 'sungai-sebagai-jalur-kehidupan',
+                'eyebrow' => 'Mobilitas',
+                'title' => 'Sungai sebagai jalur kehidupan',
                 'intro' => 'Bagi masyarakat sungai, perjalanan di atas air bukan sekadar pengalaman wisata, tetapi bagian dari cara bekerja, bertemu, dan mengakses kebutuhan sehari-hari.',
-                'image' => $images['klotok'], 'image_alt' => 'Klotok melintas di Sungai Martapura',
+                'image' => $images['klotok'],
+                'image_alt' => 'Klotok melintas di Sungai Martapura',
                 'sections' => [
                     ['title' => 'Jalur transportasi yang beradaptasi', 'body' => 'Jukung dan klotok menyesuaikan diri dengan karakter perairan. Keduanya dapat digunakan untuk membawa orang, barang, dan hasil kebun melalui jalur yang menghubungkan kampung-kampung tepian sungai.'],
                     ['title' => 'Ruang sosial dan perdagangan', 'body' => 'Perjalanan sungai mempertemukan warga, pedagang, keluarga, dan pengunjung. Pasar terapung memperlihatkan bagaimana fungsi transportasi dan perdagangan dapat berlangsung dalam ruang yang sama.'],
@@ -201,10 +344,13 @@ class PageController extends Controller
                 'conclusion' => 'Sungai tetap menjadi jalur kehidupan ketika fungsi transportasi, perdagangan, dan ruang sosialnya dihormati. Keberlanjutan peran itu bergantung pada sungai yang aman, bersih, dan dapat diakses masyarakat.',
             ],
             [
-                'number' => '03', 'slug' => 'kehidupan-ekonomi-masyarakat',
-                'eyebrow' => 'Mata Pencaharian', 'title' => 'Kehidupan ekonomi masyarakat',
+                'number' => '03',
+                'slug' => 'kehidupan-ekonomi-masyarakat',
+                'eyebrow' => 'Mata Pencaharian',
+                'title' => 'Kehidupan ekonomi masyarakat',
                 'intro' => 'Ekonomi di tepian sungai tumbuh dari hubungan antara hasil kebun, keterampilan berdagang, jaringan antarkampung, dan ruang pasar yang bergerak di atas air.',
-                'image' => $images['vendor'], 'image_alt' => 'Pedagang membawa hasil kebun di atas jukung',
+                'image' => $images['vendor'],
+                'image_alt' => 'Pedagang membawa hasil kebun di atas jukung',
                 'sections' => [
                     ['title' => 'Ekonomi yang dekat dengan lingkungan', 'body' => 'Hasil kebun dan olahan rumahan dapat dibawa menggunakan jukung menuju titik pertemuan. Pola ini memanfaatkan akses sungai sekaligus mengandalkan pengetahuan lokal tentang waktu, arus, dan kebutuhan pembeli.'],
                     ['title' => 'Pasar sebagai jaringan sosial', 'body' => 'Transaksi di pasar terapung bukan hanya pertukaran barang. Sapaan, kepercayaan, dan hubungan antarpedagang membentuk jaringan sosial yang membuat ekonomi lokal tetap lentur dan berakar pada komunitas.'],

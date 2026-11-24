@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title">
+  <title id="title">Foto profil placeholder lokal</title>
+  <rect width="640" height="480" fill="#e8eddf"/>
+  <circle cx="320" cy="176" r="82" fill="#c5a16e" opacity=".8"/>
+  <path d="M142 458c18-108 85-162 178-162s160 54 178 162" fill="#34705b"/>
+  <path d="M64 430c105-54 180-58 256-20s152 34 256-20v90H64z" fill="#173e34" opacity=".72"/>
+</svg>
